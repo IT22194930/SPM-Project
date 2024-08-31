@@ -40,6 +40,7 @@ function Fertilizer() {
   const fetchFertilizers = async () => {
     try {
       const response = await axiosFetch.get("/Fertilizer/");
+      console.log("Fetched Fertilizers Data:", response.data); // Debug log
       // Verify the data structure
       if (Array.isArray(response.data)) {
         setDataList(response.data);

@@ -35,6 +35,7 @@ function Location() {
   const fetchLocations = async () => {
     try {
       const response = await axiosFetch.get("/Location/");
+      console.log("Fetched Locations Data:", response.data); // Debug log
       // Verify the data structure
       if (Array.isArray(response.data)) {
         setDataList(response.data);

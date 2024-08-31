@@ -8,7 +8,6 @@ import Scroll from "../../hooks/useScroll";
 import useUser from "../../hooks/useUser";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import useAxiosFetch from "../../hooks/useAxiosFetch";
-import { Link } from "react-router-dom";
 
 const CostCalculator = () => {
   const [crop, setCrop] = useState("");
@@ -30,13 +29,10 @@ const CostCalculator = () => {
         const response = await axiosSecure.get(
           "/api/costCalculator/userCalculations",
           {
-            params: { userId: currentUser._id },
+            params: { userId: currentUser._id }, // Pass userId as a query parameter
           }
         );
-        const sortedCalculations = response.data.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        );
-        setPreviousCalculations(sortedCalculations);
+        setPreviousCalculations(response.data);
       } catch (error) {
         console.error("Error fetching previous calculations:", error);
       }
@@ -46,10 +42,7 @@ const CostCalculator = () => {
       try {
         const response = await axiosFetch.get("/Plant/");
         if (Array.isArray(response.data)) {
-          const sortedPlants = response.data.sort((a, b) => 
-            a.name.localeCompare(b.name)
-          );
-          setPlants(sortedPlants);
+          setPlants(response.data); // Store plants data in state
         } else {
           console.error("Unexpected data format:", response.data);
         }
@@ -62,8 +55,9 @@ const CostCalculator = () => {
       fetchPreviousCalculations();
     }
   
-    fetchPlants();
+    fetchPlants(); // Fetch plants when component mounts
   }, [currentUser, axiosSecure, axiosFetch]);
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -79,12 +73,8 @@ const CostCalculator = () => {
         soilType,
         userId: currentUser._id, // Include the userId in the request
       });
-      const newResult = response.data;
-      setResult(newResult);
-      setPreviousCalculations((prevCalculations) => [
-        newResult,
-        ...prevCalculations,
-      ]);
+      setResult(response.data);
+      setPreviousCalculations([...previousCalculations, response.data]); // Add new result to previous calculations
     } catch (error) {
       setError("Error calculating cost. Please try again.");
     } finally {
@@ -94,7 +84,7 @@ const CostCalculator = () => {
 
   return (
     <>
-      <div className="mt-20 mx-auto max-w-4xl p-6 bg-white dark:bg-slate-900 dark:border-2 dark:mt-25 shadow-lg rounded-lg">
+      <div className="mt-20 mx-auto max-w-4xl p-6 bg-white shadow-lg rounded-lg">
         <Scroll />
         <h1 className="text-4xl font-bold mb-6 text-gray-800 text-center">
           Cost Calculator
@@ -127,7 +117,7 @@ const CostCalculator = () => {
                     className={`flex flex-col items-center p-4 border-2 rounded-lg cursor-pointer hover:scale-105 transform transition-all duration-200 ${
                       crop === plant.name ? "bg-secondary" : "border-gray-300"
                     }`}
-                    style={{ zIndex: crop === plant.name ? 10 : "auto" }}
+                    style={{ zIndex: crop === plant.name ? 10 : "auto" }} // Set z-index on hover
                     onMouseEnter={(e) =>
                       e.currentTarget.style.zIndex = 10
                     }
@@ -146,7 +136,7 @@ const CostCalculator = () => {
                       value={plant.name}
                       checked={crop === plant.name}
                       onChange={(e) => setCrop(e.target.value)}
-                      className="hidden"
+                      className="hidden" // Hide the default radio input
                     />
                     <span className="text-center font-semibold text-gray-700">
                       {plant.name}
@@ -253,67 +243,56 @@ const CostCalculator = () => {
         )}
       </div>
 
-      {currentUser ? (
-        <div className="mt-16">
-          <h2 className="text-2xl font-semibold text-gray-800">
-            Your Previous Calculations
-          </h2>
-          {previousCalculations.length === 0 ? (
-            <p className="mt-4 text-gray-600">No previous calculations found.</p>
-          ) : (
-            <div className="overflow-x-auto mt-4">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-200 font-bold text-center">
-                  <tr>
-                    {[
-                      "Crop",
-                      "Area (acres)",
-                      "Estimated Cost (Rs.)",
-                      "Fertilizer Needs",
-                      "Water Needs",
-                      "Date",
-                    ].map((header) => (
-                      <th
-                        key={header}
-                        className="px-4 py-2 text-gray-700 font-semibold"
-                      >
-                        {header}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {previousCalculations.map((calculation, index) => (
-                    <tr key={index} className="text-center">
-                      <td className="px-4 py-2">{calculation.crop}</td>
-                      <td className="px-4 py-2">{calculation.area}</td>
-                      <td className="px-4 py-2 text-secondary text-xl">
-                        Rs. {calculation.estimatedCost.toFixed(2)}
-                      </td>
-                      <td className="px-4 py-2">
-                        {calculation.fertilizerNeeds}
-                      </td>
-                      <td className="px-4 py-2">{calculation.waterNeeds}</td>
-                      <td className="px-4 py-2">
-                        {new Date(calculation.createdAt).toLocaleDateString()}
-                      </td>
-                    </tr>
+      <div className="mt-16">
+        <h2 className="text-2xl font-semibold text-gray-800">
+          Your Previous Calculations
+        </h2>
+        {previousCalculations.length === 0 ? (
+          <p className="mt-4 text-gray-600">No previous calculations found.</p>
+        ) : (
+          <div className="overflow-x-auto mt-4">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-200 font-bold text-center">
+                <tr>
+                  {[
+                    "Crop",
+                    "Area (acres)",
+                    "Estimated Cost (Rs.)",
+                    "Fertilizer Needs",
+                    "Water Needs",
+                    "Date",
+                  ].map((header) => (
+                    <th
+                      key={header}
+                      className="px-4 py-2 text-gray-700 font-semibold"
+                    >
+                      {header}
+                    </th>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="mt-16 text-center">
-          <p className="text-xl text-gray-700 font-bold mb-3">
-            To save your calculations, please log in.
-          </p>
-          <Link to="/login">
-            <button className="bg-secondary rounded-md text-white p-3 hover:scale-110 duration-300">Login</button>
-          </Link>
-        </div>
-      )}
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {previousCalculations.map((calculation, index) => (
+                  <tr key={index} className="text-center">
+                    <td className="px-4 py-2">{calculation.crop}</td>
+                    <td className="px-4 py-2">{calculation.area}</td>
+                    <td className="px-4 py-2">
+                      Rs. {calculation.estimatedCost.toFixed(2)}
+                    </td>
+                    <td className="px-4 py-2">
+                      {calculation.fertilizerNeeds}
+                    </td>
+                    <td className="px-4 py-2">{calculation.waterNeeds}</td>
+                    <td className="px-4 py-2">
+                      {new Date(calculation.createdAt).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </>
   );
 };

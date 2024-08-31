@@ -40,6 +40,7 @@ function Plant() {
   const fetchPlants = async () => {
     try {
       const response = await axiosFetch.get("/Plant/");
+      console.log("Fetched Plants Data:", response.data);
       if (Array.isArray(response.data)) {
         setDataList(response.data);
         setFilteredDataList(response.data);

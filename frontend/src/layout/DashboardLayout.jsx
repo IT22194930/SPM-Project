@@ -233,23 +233,6 @@ const DashboardLayout = () => {
             </button>
           </li>
         </ul>
-        {/* User Info Section */}
-        {currentUser && (
-          <div className="absolute bottom-5 px-4 flex items-center gap-x-4">
-            <img
-              src={currentUser?.photoUrl}
-              alt={currentUser?.name}
-              className="w-12 h-12 rounded-full object-cover border-2"
-            />
-            <span
-              className={`${
-                !open && "hidden"
-              } text-gray-700 font-semibold text-sm`}
-            >
-              {currentUser?.name || "User"}
-            </span>
-          </div>
-        )}
       </div>
 
       <div className="h-screen overflow-y-auto px-8 flex-1">

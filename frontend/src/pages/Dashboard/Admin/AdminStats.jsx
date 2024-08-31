@@ -8,6 +8,8 @@ const AdminStats = ({users}) => {
       axiosSecure.get('/admin-stats').then(res => setData(res.data)).catch(err => console.log(err))
    }, [])
 
+   console.log(data)
+
   return (
     <div>
       <div className='grid grid-cols-1 gap-4 px-4 mt-8 sm:grid-cols-4 sm:px-8'>
